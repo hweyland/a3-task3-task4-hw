@@ -1,0 +1,23 @@
+---
+sctitle: "a3_task3_hanna_weyland"
+author: "Hanna Weyland"
+date: "11/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+### Read in Urchin Data
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+urchin_data <- read.csv(here("data", "urchins.csv")) %>% 
+  clean_names()
+ggplot(data = urchin_data, aes(sample=common_name)) +
+  geom_histogram(stat = "count") +
+  facet_wrap(~common_name)
+```
+
