@@ -49,7 +49,7 @@ urchin_stats
 
 ```
 
-****The red urchin has a greater mean, median and standard deviation. Sample size for purple urchin is larger. 
+> The red urchin has a greater mean, median and standard deviation. Sample size for purple urchin is larger. 
 
 ## Section 2
 
