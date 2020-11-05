@@ -1,5 +1,5 @@
 ---
-sctitle: "a3_task3_hanna_weyland"
+title: "a3_task3"
 author: "Hanna Weyland"
 date: "11/3/2020"
 output: html_document
@@ -14,17 +14,17 @@ library(lubridate)
 ```
 
 
-##Section 1
+## Section 1
 
-### Read in Urchin Data and Create a Histogram and Boxplot of Red and Purple Urchins 
+## Read in Urchin Data and Create a Histogram and Boxplot of Red and Purple Urchins 
 
-Here I read in the urchin data and created a histogram and boxplot comparing the distribution of sizes between purple and red urchins. 
+Here I read in the urchin data and create a histogram and box plot comparing the distribution of sizes between purple and red urchins. 
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE}
 urchin_data <- read.csv(here("data", "urchins.csv")) %>% 
   clean_names()
 ggplot(data = urchin_data, aes(x=size)) +
-  geom_histogram(bins = 25) +
+  geom_histogram(bins = 45) +
   facet_wrap(~common_name) +
   labs(title = "Purple and Red Urchin Distribution by Size", x = "Size (cm)", y = "Number of Urchins")
 ```
@@ -49,7 +49,7 @@ urchin_stats
 
 ```
 
-> The red urchin has a greater mean, median and standard deviation. Sample size for purple urchin is larger. 
+> The red urchin sample has a greater distribution and a higher mean, median and standard deviation. The purple urchin sample has a smaller more condensed distribution and lower mean. The % difference between the means is 0.41 or 41%. Both samples have a relatively normal distribution although the purple urchin data looks to be slightly positively skewed. 
 
 ## Section 2
 
@@ -77,9 +77,11 @@ Here I will make a summary table containing the total number of purple urchins o
 
 ```{r}
 purple_site_year <- purple_urchins %>% 
-  filter(site_full %in% c("Naples Reef", "Arroyo Quemado Reef", "Carpinteria Reef", "Mohawk Reef", "Isla Vista Reef"), year_new >= 2008, year_new <= 2020) %>% 
-  group_by(year_new, site_full) %>% 
+  filter(site_full %in% c("Naples Reef", "Arroyo Quemado Reef", "Carpinteria Reef", "Mohawk Reef", "Isla Vista Reef"), 
+         year_new >= 2008, year_new <= 2020) %>% 
+  group_by(site_full, year_new) %>% 
   count()
+purple_site_year
 ```
 
 
@@ -91,12 +93,10 @@ Here I will create a histogram displaying the counts of purple urchins recorded 
 ggplot(data=purple_site_year, aes(x=year_new, y=n)) +
   geom_col() +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 6)) + scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
-  labs(title = "Number of Purple Urchins at Various Sites from 2008-2020", x= "Year", y="Count") +
+  labs(title = "Number of Purple Urchins at Various Sites from 2008-2020", x= "Year", y="Number of Purple Urchins") +
   facet_wrap(~site_full)
 
 ```
-
-
 
 
 
