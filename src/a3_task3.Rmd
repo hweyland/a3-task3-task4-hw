@@ -1,0 +1,104 @@
+---
+title: "a3_task3"
+author: "Hanna Weyland"
+date: "11/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(lubridate)
+```
+
+
+## Section 1
+
+## Read in Urchin Data and Create a Histogram and Boxplot of Red and Purple Urchins 
+
+Here I read in the urchin data and create a histogram and box plot comparing the distribution of sizes between purple and red urchins. 
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+urchin_data <- read.csv(here("data", "urchins.csv")) %>% 
+  clean_names()
+ggplot(data = urchin_data, aes(x=size)) +
+  geom_histogram(bins = 45) +
+  facet_wrap(~common_name) +
+  labs(title = "Purple and Red Urchin Distribution by Size", x = "Size (cm)", y = "Number of Urchins")
+```
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+ggplot(data=urchin_data, aes(x=common_name, y=size)) +
+  geom_boxplot() +
+  labs(title = "Red and Purple Urchin Distribution by Size", x = "Common Name", y = "Size (cm)")
+```
+
+### Summary Table for Red and Purple Urchins 
+Here I create a summary table for that contains the following statistics for purple and red urchins: mean, median, standard deviation, and sample size. 
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+urchin_stats <- urchin_data %>% 
+  group_by(common_name) %>% 
+  summarize(mean_size = mean(size),
+            median_size = median(size),
+            sd_size = sd(size),
+            sample_size = n())
+urchin_stats
+
+```
+
+> The red urchin sample has a greater distribution and a higher mean, median and standard deviation. The purple urchin sample has a smaller more condensed distribution and lower mean. The % difference between the means is 0.41 or 41%. Thus, the means of the samples are 41% different. Both samples have a relatively normal distribution although the purple urchin data looks to be slightly positively skewed. 
+
+## Section 2
+
+### Explore Purple Urchin Counts by Site and Year
+
+Here I look at purple urchin counts by site and year. Using the 'case_when()' function to change site abbreviations to full names.  
+
+```{r}
+purple_urchins <- urchin_data %>% 
+  filter(common_name == "Purple Urchin") %>% 
+  mutate(date_new = mdy(date)) %>% 
+  mutate(year_new = year(date_new)) %>% 
+  mutate(site_full = case_when(
+    site %in% c("NAPL") ~"Naples Reef",
+    site %in% c("AQUE") ~"Arroyo Quemado Reef",
+    site %in% c("CARP") ~"Carpinteria Reef",
+    site %in% c("MOHK") ~ "Mohawk Reef",
+    site %in% c("IVEE") ~ "Isla Vista Reef"
+  ))
+```
+
+## Make a Summary Table 
+
+Here I will make a summary table containing the total number of purple urchins observed by site and year. 
+
+```{r}
+purple_site_year <- purple_urchins %>% 
+  filter(site_full %in% c("Naples Reef", "Arroyo Quemado Reef", "Carpinteria Reef", "Mohawk Reef", "Isla Vista Reef"), 
+         year_new >= 2008, year_new <= 2020) %>% 
+  group_by(year_new, site_full) %>% 
+  count()
+purple_site_year
+```
+
+
+## Create an Exploratory Graph 
+
+Here I will create a histogram displaying the counts of purple urchins recorded at each site over time for the years included in the study
+
+```{r}
+ggplot(data=purple_site_year, aes(x=year_new, y=n)) +
+  geom_col() +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 6)) + scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
+  labs(title = "Number of Purple Urchins at Various Sites from 2008-2020", x= "Year", y="Count") +
+  facet_wrap(~site_full)
+
+```
+
+
+
+
+

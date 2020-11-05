@@ -11,6 +11,7 @@ library(tidyverse)
 library(here)
 library(janitor)
 library(lubridate)
+library(kableExtra)
 ```
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE}
@@ -18,46 +19,81 @@ urchin_data <- read_csv(here("data", "urchins.csv")) %>%
   clean_names()
 ```
 
-## Comparing mean size between control and annual purple sea urchins in Naples Reef in January 2010
+### Comparing mean size between control and annual purple sea urchins in Naples Reef in January 2010
 Here, I will compare the mean sizes of purple urchins in a control and annual experiment in Naples Reef in January of 2010. 
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE}
-#filter data to be purple urchin and NAPL
-
 purple_urchin <- urchin_data %>% 
   mutate(date_new = mdy(date)) %>% 
   mutate(month_new = month(date_new)) %>% 
   mutate(year_new = year(date_new)) %>% 
-  filter(common_name == "Purple Urchin", month_new == 1, year_new == 2010)
+  filter(common_name == "Purple Urchin", 
+         month_new == 1, 
+         year_new == 2010, 
+         site == "NAPL") %>% 
+  group_by(treatment)
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-urchin_control <- purple_urchin %>% 
-  filter(treatment == "CONTROL") %>% 
-  pull(size)
-mean(urchin_control)
 
-urchin_annual <- purple_urchin %>% 
-  filter(treatment == "ANNUAL") %>% 
-  pull(size)
-mean(urchin_annual)
-```
-
-```{r}
+### Create a histogram and qqplot for the mean size of purple urchins in Naples Reed in January 2010
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
 ggplot(data=purple_urchin, aes(x=size)) + 
   geom_histogram(bins=10) + 
   facet_wrap(~treatment) +
    labs(title = "Mean Size of Purple Urchins at Naples Reef in 2010", x= "Mean Size", y="Number of Purple Urchins")
 ```
 
-```{r}
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
 ggplot(data=purple_urchin, aes(sample=size)) + 
   geom_qq() + 
   facet_wrap(~treatment) +
-   labs(title = "Mean Size of Purple Urchins at Naples Reef in 2010", x= "Mean Size", y="Number of Purple Urchins")
+   labs(title = "Mean Size of Purple Urchins at Naples Reef in 2010", 
+        x= "Mean Size", 
+        y="Number of Purple Urchins")
+```
+### Summary Statistics 
+Here I will find the summary statistics for the control and annual purple urchin sample 
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+urchin_control <- purple_urchin %>% 
+  filter(treatment =="CONTROL")%>% 
+  summarize(
+    mean_control = mean(size),
+    median_control = median(size), 
+    sd_control = sd(size),
+    sample_control = n())
+kbl(urchin_control) %>% 
+  kable_styling()
+urchin_control
+
+
+urchin_annual <- purple_urchin %>% 
+  filter(treatment =="ANNUAL")%>% 
+  summarize(
+    mean_annual = mean(size),
+    median_annual = median(size), 
+    sd_annual = sd(size),
+    sample_annual = n())
+kbl(urchin_annual) %>% 
+  kable_styling()
+urchin_annual
+```
+## Perform a two sample t-test 
+Here I perform a two sample t-test with the control and annual purple urchin. 
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+
+urchin_control <- purple_urchin %>% 
+  filter(treatment == "CONTROL") %>% 
+  pull(size)
+
+urchin_annual <- purple_urchin %>% 
+  filter(treatment == "ANNUAL") %>% 
+  pull(size)
+
+t.test(urchin_control, urchin_annual)
 ```
 
-
+> Both the annual and control samples show a relatively normal distribution. Looking at the annual and control samples, the annual sample has a slightly larger distribution in comparison to the control. The % difference between the two means is 0.058 or 5.8% meaning that the two means from the control and annual samples are only 5.8% different. The p-value of 0.2536 indicates that there is less evidence that the samples were drawn different from populations, thus suggesting that the annual and control samples were collected from the same population.
 
 
 
