@@ -7,24 +7,65 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+urchin_data <- read_csv(here("data", "urchins.csv")) %>% 
+  clean_names()
 ```
 
-## Including Plots
+## Comparing mean size between control and annual purple sea urchins in Naples Reef in January 2010
+Here, I will compare the mean sizes of purple urchins in a control and annual experiment in Naples Reef in January of 2010. 
 
-You can also embed plots, for example:
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+#filter data to be purple urchin and NAPL
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+purple_urchin <- urchin_data %>% 
+  mutate(date_new = mdy(date)) %>% 
+  mutate(month_new = month(date_new)) %>% 
+  mutate(year_new = year(date_new)) %>% 
+  filter(common_name == "Purple Urchin", month_new == 1, year_new == 2010)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+urchin_control <- purple_urchin %>% 
+  filter(treatment == "CONTROL") %>% 
+  pull(size)
+mean(urchin_control)
+
+urchin_annual <- purple_urchin %>% 
+  filter(treatment == "ANNUAL") %>% 
+  pull(size)
+mean(urchin_annual)
+```
+
+```{r}
+ggplot(data=purple_urchin, aes(x=size)) + 
+  geom_histogram(bins=10) + 
+  facet_wrap(~treatment) +
+   labs(title = "Mean Size of Purple Urchins at Naples Reef in 2010", x= "Mean Size", y="Number of Purple Urchins")
+```
+
+```{r}
+ggplot(data=purple_urchin, aes(sample=size)) + 
+  geom_qq() + 
+  facet_wrap(~treatment) +
+   labs(title = "Mean Size of Purple Urchins at Naples Reef in 2010", x= "Mean Size", y="Number of Purple Urchins")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
